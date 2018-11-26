@@ -10,6 +10,11 @@ def index(request):
 
 def addtask(request):
 	name = request.POST.get('name')
+	title = request.POST.get("title")
+	duetime = request.POST.get("duetime")
+	describe = request.POST.get("describe")
+	contents = request.POST.get("contents")
+	print(name, title, duetime, describe, contents)
 	return HttpResponse('11')
 
 def movetask(request):

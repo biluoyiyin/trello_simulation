@@ -37,19 +37,30 @@
         <div class="ediDiv">
             <a class="close"> </a>
             <div class="eTitle" contenteditable="plaintext-only"></div>
-            <div class="tag">tag : yellow</div>
-            Due days : <input type="text" id="datepicker">
-            <div class="des"> Descirbe:
-                 <input class="Input_des" type="text" placeholder="add some brief description here.">
+            <div class="sec">
+                <div class="tag"> Tags: 
+                    <label id="yellow" class="radio"><input type="radio" name="tagColor" value="yellow"> yellow</label>
+                    <label id="red" class="radio"><input type="radio" name="tagColor" value="red"> red  </label>
+                    <label id="azure" class="radio"><input type="radio" name="tagColor" value="azure" checked="checked"> azure</label>
+                </div>
+                <div class="dueday">Due days : <input id="datepicker"> </div>
             </div>
-            <div class="details"> detail :
-                <input class="Input_detail" type="text" placeholder="describe your task in detail here.">
+            <div class ="inp">
+                <h4>Descirbe :</h4>
+                <div class="des"> 
+                     <input class="Input_des" type="text" placeholder="add a little description here." maxlength="50">
+                </div>
+                <h4>detail :</h4>
+                <div class="details"> 
+                    <textarea  class="det1"></textarea >
+                </div>
             </div>
-            <button class="delTask" type="button">Delete this</button>
+            <div class="btn">
+                <button class="delTask" type="button">Delete this</button>
+            </div>
         </div>
     </div>
-    
-    
+
     <script src="/static/js/jquery-3.3.1.min.js"></script>  
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/static/js/index.js"></script>  

@@ -22,9 +22,11 @@ function makeNewborad(){
     nb.setAttribute("contents", "");
     //set the unique id is the time created.
     nb.setAttribute("name", Date.now());
+    nb.setAttribute("tag", "azure");
     var data_to_back = {
         "title": "New task",
         "duetime": "null",
+        "tag": "azure",
         "describe": "",
         "contents": "",
     }
@@ -46,6 +48,10 @@ document.addEventListener('click', function (e) {
     }
 })
 
+// code for change tag color
+function changeTag(target, color){
+    $(target).css("background-color", color);
+}
 // code for darggable
 function boardMove(event){
     var target = this;
@@ -117,18 +123,30 @@ function editableDiv(){
     var target = this;
     var data_to_back = {};
     var OTitle = target.childNodes[0].textContent;
+    var tag = target.getAttribute("tag");
     var duetime = target.childNodes[1].textContent;
     var desc = target.childNodes[2].textContent;
     var con_detail = target.getAttribute("contents");
     $("#datepicker").datepicker();
-    
-    //console.log(OTitle + "-" + duetime + "-" + desc + "-" + con_detail);
+    if(duetime){
+        $("#datepicker").val(duetime);
+    }
     
     $(".eTitle").text(OTitle);
+    $(".duetime").val(duetime);
+    $("input[name='tagColor'][value='"+tag+"']").prop('checked', true);
+    $(".Input_des").val(desc);
+    $(".det1").val(con_detail);
+    
+    
     $(".cover").css({
         "z-index": "100",
         "display": "block",
     });
+    
+    $(".tag").on("click", function (e){
+        e.stopPropagation() 
+    })
     
     $(".ediDiv").on("click", function (e){
         return false;
@@ -148,12 +166,20 @@ function editableDiv(){
         $(".ediDiv").off();
         var new_time = $("#datepicker").datepicker('getDate');
         var new_day = $.datepicker.formatDate("dd-mm-yy", new_time);
-   
+        
         //check whether title changes
         if ($(".eTitle").text() != OTitle){
             change = true;
             target.childNodes[0].textContent = $(".eTitle").text();
             data_to_back["title"] = $(".eTitle").text();
+        }
+        
+        var new_tag = $("input[name = 'tagColor']:checked").val();
+        if (new_tag != tag){
+            change = true;
+            target.setAttribute("tag", new_tag);
+            data_to_back["tag"] = new_tag;
+            changeTag(target, new_tag);
         }
         
         if (new_day != duetime){
@@ -168,12 +194,12 @@ function editableDiv(){
             target.childNodes[2].textContent = $(".Input_des").val();
             data_to_back["describe"] = $(".Input_des").val();
         }
-
+        
         // check weather content change
-        if ($(".Input_detail").val() != con_detail){
+        if ($(".det1").val() != con_detail){
             change = true;
-            target.contents = $(".Input_detail").val();
-            data_to_back["contents"] = $(".Input_detail").val();
+            target.setAttribute("contents", $(".det1").val());
+            data_to_back["contents"] = $(".det1").val();
         }
         if(change){
             to_back_single(target, data_to_back);
@@ -249,6 +275,7 @@ document.addEventListener("mousedown", function (e) {
 
 
 
+
 //  Ajax requeset
 function getCookie(name) {
     var cookieValue = null;
@@ -279,14 +306,7 @@ $.ajaxSetup({
     }
 })
 
-function toBack(elem, data_to_back){
-    data_to_back["name"] = elem.getAttribute("name");
-    $.post("addtask", data_to_back, function (Date){
-        //console.log(Date);
-    })
-}
-
-function to_back_single(elem, data_to_back){
+function to_back_single(elem, data_to_back){  
     data_to_back["name"] = elem.getAttribute("name");
     $.post("addtask", data_to_back, function (Date){
         //console.log(Date);
@@ -340,7 +360,7 @@ function check(name){
 
 function move_to_Back(data_to_back){
     data_to_back = JSON.parse(JSON.stringify(data_to_back));
-    console.log(data_to_back);
+    //console.log(data_to_back);
     $.post("movetask", data_to_back, function (Date){
         //console.log(Date);
     })
