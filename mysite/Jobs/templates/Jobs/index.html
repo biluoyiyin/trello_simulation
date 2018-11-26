@@ -4,33 +4,27 @@
     <title>Manage Your Works</title>
     <meta charset="utf-8">
     <link rel="stylesheet" type="text/css" href="/static/css/index.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 </head>
 <body>
     <div id = "worksheet">
       
         <div class="container">
             <p class="Toplist">To do</p>
-            <div class="boards"></div>
-            <div class="newboard">
-                add one
-            </div>
-         
+            <div class="boards" name="todo"></div>
+            <div class="newboard">add one</div>       
         </div>
 
         <div class="container"> 
             <p class="Toplist">Doing</p>
-            <div class="boards"></div>
-            <div class="newboard">
-                add one
-            </div>
+            <div class="boards" name="doing"></div>
+            <div class="newboard">add one</div>
         </div>
 
         <div class="container"> 
             <p class="Toplist">Done</p>
-            <div class="boards"></div>
-            <div class="newboard">
-                add one
-            </div>
+            <div class="boards" name="done"></div>
+            <div class="newboard">add one</div>
         </div>
 
         <div class="container"> 
@@ -38,8 +32,26 @@
         </div>
         
     </div>
-
+    
+    <div class="cover">
+        <div class="ediDiv">
+            <a class="close"> </a>
+            <div class="eTitle" contenteditable="plaintext-only"></div>
+            <div class="tag">tag : yellow</div>
+            Due days : <input type="text" id="datepicker">
+            <div class="des"> Descirbe:
+                 <input class="Input_des" type="text" placeholder="add some brief description here.">
+            </div>
+            <div class="details"> detail :
+                <input class="Input_detail" type="text" placeholder="describe your task in detail here.">
+            </div>
+            <button class="delTask" type="button">Delete this</button>
+        </div>
+    </div>
+    
+    
     <script src="/static/js/jquery-3.3.1.min.js"></script>  
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/static/js/index.js"></script>  
 </body>
 </html>
