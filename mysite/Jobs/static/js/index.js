@@ -4,7 +4,7 @@ var doingSeq;
 var doneSeq;
 
 // add a new board
-function makeNewborad(){
+function makeNewborad(sign){
     var nb = document.createElement("div");
     var title = document.createElement("div");
     title.textContent = "New task";
@@ -14,10 +14,10 @@ function makeNewborad(){
     duetime.textContent = "null";
     duetime.className = "duetime";
     nb.appendChild(duetime);
-    var describe = document.createElement("div");
-    describe.textContent = "";
-    describe.className = "pdescribe";
-    nb.appendChild(describe);
+    var describes = document.createElement("div");
+    describes.textContent = "";
+    describes.className = "pdescribe";
+    nb.appendChild(describes);
     nb.className = "board";
     nb.setAttribute("contents", "");
     //set the unique id is the time created.
@@ -27,12 +27,16 @@ function makeNewborad(){
         "title": "New task",
         "duetime": "null",
         "tag": "azure",
-        "describe": "",
+        "describes": "",
         "contents": "",
+        "isNew": "yes",
     }
-    to_back_single(nb, data_to_back);
+    if (sign == "new"){
+        to_back_single(nb, data_to_back);
+    }
     return nb;
 }
+
 
 
 // add new one
@@ -42,7 +46,7 @@ document.addEventListener('click', function (e) {
 
     if (target.matches("div.newboard")) {
         var boards = target.parentNode.childNodes[3];
-        var that = makeNewborad()
+        var that = makeNewborad("new")
         boards.appendChild(that);
         boardChange(that.parentNode.getAttribute("name"), null);
     }
@@ -51,6 +55,19 @@ document.addEventListener('click', function (e) {
 // code for change tag color
 function changeTag(target, color){
     $(target).css("background-color", color);
+}
+
+// code for init pages
+function changeAttr(name, tag, title, duetime, describes, contents){
+    var new_elem = makeNewborad("old")
+    new_elem.setAttribute("name", name);
+    new_elem.setAttribute("tag", tag);
+    new_elem.childNodes[0].textContent = title;
+    new_elem.childNodes[1].textContent = duetime;
+    new_elem.childNodes[2].textContent = describes;
+    new_elem.setAttribute("contents", contents);
+    $(new_elem).css("background-color", tag);
+    return new_elem;
 }
 // code for darggable
 function boardMove(event){
@@ -192,7 +209,7 @@ function editableDiv(){
         if ($(".Input_des").val() != desc){
             change = true;
             target.childNodes[2].textContent = $(".Input_des").val();
-            data_to_back["describe"] = $(".Input_des").val();
+            data_to_back["describes"] = $(".Input_des").val();
         }
         
         // check weather content change
@@ -202,6 +219,7 @@ function editableDiv(){
             data_to_back["contents"] = $(".det1").val();
         }
         if(change){
+            data_to_back["isNew"] = "now";
             to_back_single(target, data_to_back);
         }
 
@@ -309,7 +327,7 @@ $.ajaxSetup({
 function to_back_single(elem, data_to_back){  
     data_to_back["name"] = elem.getAttribute("name");
     $.post("addtask", data_to_back, function (Date){
-        //console.log(Date);
+        console.log(Date);
     })
 }
 
@@ -360,7 +378,6 @@ function check(name){
 
 function move_to_Back(data_to_back){
     data_to_back = JSON.parse(JSON.stringify(data_to_back));
-    //console.log(data_to_back);
     $.post("movetask", data_to_back, function (Date){
         //console.log(Date);
     })

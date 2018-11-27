@@ -8,6 +8,9 @@
 </head>
 <body>
     <div id = "worksheet">
+        {% if request.session.is_login %}
+            <p>User name: <a href="./group">{{ request.session.username }}</a> </p>
+        {% endif %}
         
         <div class="container">
             <p class="Toplist">To do</p>
@@ -61,27 +64,16 @@
         </div>
     </div>
 
-    {% if request.session.is_login %}
-            <p>User name: <a href="./group">{{ request.session.username }}</a> </p>
-    {% endif %}
     <script src="/static/js/jquery-3.3.1.min.js"></script>  
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/static/js/index.js"></script>  
     <script>
         {% if request.session.is_login %}
-            {% for item in todo %}
-                var new_todo = changeAttr("{{ item.name }}", "{{ item.tag }}", "{{ item.title }}", "{{ item.duetime }}", "{{ item.describes }}", "{{ item.contents }}")
-                $("div[name*=todo]")[0].appendChild(new_todo);
-            {% endfor %}
-            {% for item in doing %}
-                var new_todo = changeAttr("{{ item.name }}", "{{ item.tag }}", "{{ item.title }}", "{{ item.duetime }}", "{{ item.describes }}", "{{ item.contents }}")
-                $("div[name*=doing]")[0].appendChild(new_todo);
-            {% endfor %}
-            {% for item in done %}
-                var new_todo = changeAttr("{{ item.name }}", "{{ item.tag }}", "{{ item.title }}", "{{ item.duetime }}", "{{ item.describes }}", "{{ item.contents }}")
-                $("div[name*=done]")[0].appendChild(new_todo);
+            {% for item in grouplist %}
+                console.log(item)
             {% endfor %}
         {% endif %}
+        
     </script>
 </body>
 </html>

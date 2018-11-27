@@ -1,0 +1,47 @@
+<!DOCTYPE html5>
+<html lang="en">
+<head>
+    <title>Register</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/register.css">
+</head>
+<body>
+    <section id="wrapper">
+        <div>
+            <form action="create_account" method="post">
+                {% csrf_token %}
+                <h3 >User Register</h3>
+                {% if error %}
+                    <div class="alert alert-warning">{{ error }}</div>
+                {% endif %}
+                <div class="form-group">
+                    <div class="col-xs-12">
+                        <input class="form-control" type="text" name="username" id="username"  placeholder="user name">
+                    </div>
+                </div>
+                <div class="form-group ">
+                    <div class="col-xs-12">
+                        <input class="form-control" type="password" name="password" id="password" placeholder="password">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-xs-12">
+                        <input class="form-control" type="password" name="password_confirm" placeholder="repeat your password">
+                    </div>
+                </div>
+                <div class="form-group text-center m-t-20">
+                    <div class="col-xs-12">
+                        <button class="btn btn-info btn-lg btn-block text-uppercase waves-effect waves-light" type="submit">register</button>
+                    </div>
+                </div>
+                <div class="form-group m-b-0">
+                    <div class="col-sm-12 text-center">
+                        <p>have an account already? <a href="./login" class="text-info m-l-5"><b>login</b></a></p>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </section>
+</body>
+</html>
+

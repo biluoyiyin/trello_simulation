@@ -1,0 +1,25 @@
+<!DOCTYPE html5>
+<html lang="en">
+<head>
+    <title>Group</title>
+    <meta charset="utf-8">
+</head>
+<body>
+    <div>
+        {% if request.session.is_login %}
+             <p> User name: {{ request.session.username }}</p>
+        {% endif %}
+        {% for item in grouplist %}
+            <div> <a href=".?group={{ item }}"> gourp name:  {{ item }} </a> </div>
+        {% endfor %}
+        <div class="btn">
+            New gourp name<input type="text" name="groupName" class="newgroupname" placeholder="group name." maxlength="50">
+            <button class="creatBord" type="button">Create a new group</button>
+        </div>
+    </div>
+    
+    <script src="/static/js/jquery-3.3.1.min.js"></script>  
+    <script src="/static/js/group.js"></script> 
+</body>
+</html>
+
