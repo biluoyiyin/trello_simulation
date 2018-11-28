@@ -14,6 +14,8 @@ cursor = conn.cursor()
 
 @csrf_exempt
 def index(request):
+	if "is_login" not in request.session:
+		return redirect("./login")
 	if not request.session['is_login']:
 		return redirect("./login")
 	group = request.GET.get('group')

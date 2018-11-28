@@ -21,7 +21,7 @@
                     <p> Belong to <b>{{ value }}</b><p>
                     <button name="deltask" type="button" value="{{ key }}">leave this group</button>
                     <div>
-                        Invite firends  <input type="text" name="username" class="otheruser" placeholder="your firends name." maxlength="50">
+                        Invite firends  <input type="text" name="username" class="otheruser" placeholder="your firends name." maxlength="50" required>
                         <button class="invite" type="button">Invite</button>
                     </div>
                 </div>
@@ -29,7 +29,7 @@
             {% endfor %}
         {% endif %}
         <div class="btn">
-            New gourp name<input type="text" name="groupName" class="newgroupname" placeholder="group name." maxlength="50">
+            New gourp name<input type="text" name="groupName" class="newgroupname" placeholder="group name." maxlength="50" required>
             <button class="creatBord" type="button">Create a new group</button>
         </div>
     </div>
