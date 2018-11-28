@@ -171,7 +171,10 @@ function editableDiv(){
     
     // delete this task
     $(".delTask").on("click", function (e){
+        delboard(target.getAttribute("name"));
+        var parname = target.parentNode.getAttribute("name");
         target.parentNode.removeChild(target);
+        boardChange(parname, null);
         $(".ediDiv").off();
         $(document).trigger("click");
     })
@@ -331,6 +334,14 @@ function to_back_single(elem, data_to_back){
     })
 }
 
+function delboard(name){
+    var data_to_back = {};
+    data_to_back["name"] = name;
+    $.post("deltask", data_to_back, function (Date){
+        console.log(Date);
+    })
+}
+
 function boardChange(first, second){  
     var data_to_back = {};
     var changed = false;
@@ -377,6 +388,7 @@ function check(name){
 }
 
 function move_to_Back(data_to_back){
+    console.log(data_to_back);
     data_to_back = JSON.parse(JSON.stringify(data_to_back));
     $.post("movetask", data_to_back, function (Date){
         //console.log(Date);

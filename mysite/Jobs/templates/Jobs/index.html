@@ -26,10 +26,17 @@
             <div class="boards" name="done"></div>
             <div class="newboard">add one</div>
         </div>
-
+        <!--
         <div class="container"> 
             <p class="Toplist">Adding more</p>
         </div>
+        -->
+        {% if request.session.is_login %}
+        <div class="user">
+            <div>Logined as: &nbsp <a href="./group"> {{ request.session.username }} </a></div>
+            <div><a href="./logout">Log out</a> </div>  
+        </div>
+        {% endif %}
         
     </div>
     
@@ -61,9 +68,7 @@
         </div>
     </div>
 
-    {% if request.session.is_login %}
-            <p>User name: <a href="./group">{{ request.session.username }}</a> </p>
-    {% endif %}
+
     <script src="/static/js/jquery-3.3.1.min.js"></script>  
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
     <script src="/static/js/index.js"></script>  

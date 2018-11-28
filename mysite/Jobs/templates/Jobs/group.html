@@ -3,15 +3,31 @@
 <head>
     <title>Group</title>
     <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="/static/css/group.css">
 </head>
 <body>
     <div>
         {% if request.session.is_login %}
-             <p> User name: {{ request.session.username }}</p>
+            <div>
+                <p id="user" name="{{ request.session.username }}"> User name: {{ request.session.username }}</p>
+                <a href="./logout">Log out</a> 
+            </div>
         {% endif %}
-        {% for item in grouplist %}
-            <div> <a href=".?group={{ item }}"> gourp name:  {{ item }} </a> </div>
-        {% endfor %}
+        {% if groupli %}
+            {% for key, value in groupli.items %}
+            <div class="container">
+                <div class="grouplist"> 
+                    <a href=".?group={{ key }}"> gourp name:  {{ key }} </a>
+                    <p> Belong to <b>{{ value }}</b><p>
+                    <button name="deltask" type="button" value="{{ key }}">leave this group</button>
+                    <div>
+                        Invite firends  <input type="text" name="username" class="otheruser" placeholder="your firends name." maxlength="50">
+                        <button class="invite" type="button">Invite</button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
         <div class="btn">
             New gourp name<input type="text" name="groupName" class="newgroupname" placeholder="group name." maxlength="50">
             <button class="creatBord" type="button">Create a new group</button>

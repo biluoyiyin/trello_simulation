@@ -16,7 +16,7 @@ cursor = conn.cursor()
 def index(request):
 	if not request.session['is_login']:
 		return redirect("./login")
-	group = request.session['cur_group']
+	group = request.GET.get('group')
 	if not group:
 		return redirect("./group")
 	request.session['cur_group'] = group
@@ -26,37 +26,39 @@ def index(request):
 	data = cursor.fetchall()
 	if (data):
 		todo = data[0][0].split(",")
-		for i in todo:
-			if(not i or i=="undefined"):
-				continue
-			taskId = "{},{}".format(i, group)
-			cursor.execute("select * from tasks where taskId = '{}'".format(taskId))
-			a_todo = cursor.fetchone()
-			to_name, to_tag, to_title, to_duetime, to_des, to_con = a_todo[0].split(",")[0], a_todo[1], a_todo[2], a_todo[3], a_todo[4], a_todo[5]
-			data_to_front["todo"].append({"name": to_name, "tag": to_tag, "title": to_title, "duetime": to_duetime, "describes": to_des, "contents": to_con})
+		if (todo):
+			for i in todo:
+				if((not i) or (i == "undefined") or (i == "") or (i == "None")):
+					continue
+				taskId = "{},{}".format(i, group)
+				cursor.execute("select * from tasks where taskId = '{}'".format(taskId))
+				a_todo = cursor.fetchone()
+				to_name, to_tag, to_title, to_duetime, to_des, to_con = a_todo[0].split(",")[0], a_todo[1], a_todo[2], a_todo[3], a_todo[4], a_todo[5]
+				data_to_front["todo"].append({"name": to_name, "tag": to_tag, "title": to_title, "duetime": to_duetime, "describes": to_des, "contents": to_con})
 
 		doing = data[0][1].split(",")
-		for i in doing:
-			if(not i or i=="undefined"):
-				continue
-			taskId = "{},{}".format(i, group)
-			cursor.execute("select * from tasks where taskId = '{}'".format(taskId))
-			a_doing = cursor.fetchone()
-			to_name, to_tag, to_title, to_duetime, to_des, to_con = a_doing[0].split(",")[0], a_doing[1], a_doing[2], a_doing[3], a_doing[4], a_doing[5]
-			data_to_front["doing"].append({"name": to_name, "tag": to_tag, "title": to_title, "duetime": to_duetime, "describes": to_des, "contents": to_con})
+		if (doing):
+			for i in doing:
+				if((not i) or (i == "undefined") or (i == "") or (i == "None")):
+					continue
+				taskId = "{},{}".format(i, group)
+				cursor.execute("select * from tasks where taskId = '{}'".format(taskId))
+				a_doing = cursor.fetchone()
+				to_name, to_tag, to_title, to_duetime, to_des, to_con = a_doing[0].split(",")[0], a_doing[1], a_doing[2], a_doing[3], a_doing[4], a_doing[5]
+				data_to_front["doing"].append({"name": to_name, "tag": to_tag, "title": to_title, "duetime": to_duetime, "describes": to_des, "contents": to_con})
 		
 		done = data[0][2].split(",")
-		for i in done:
-			if(not i or i=="undefined"):
-				continue
-			taskId = "{},{}".format(i, group)
-			cursor.execute("select * from tasks where taskId = '{}'".format(taskId))
-			a_done = cursor.fetchone()
-			to_name, to_tag, to_title, to_duetime, to_des, to_con = a_done[0].split(",")[0], a_done[1], a_done[2], a_done[3], a_done[4], a_done[5]
-			data_to_front["done"].append({"name": to_name, "tag": to_tag, "title": to_title, "duetime": to_duetime, "describes": to_des, "contents": to_con})
+		if (done):
+			print(done)
+			for i in done:
+				if((not i) or (i == "undefined") or (i == "") or (i == "None")):
+					continue
+				taskId = "{},{}".format(i, group)
+				cursor.execute("select * from tasks where taskId = '{}'".format(taskId))
+				a_done = cursor.fetchone()
+				to_name, to_tag, to_title, to_duetime, to_des, to_con = a_done[0].split(",")[0], a_done[1], a_done[2], a_done[3], a_done[4], a_done[5]
+				data_to_front["done"].append({"name": to_name, "tag": to_tag, "title": to_title, "duetime": to_duetime, "describes": to_des, "contents": to_con})
 		
-	
-	#print(todo, doing, done, "-------")
 	return render(request, "Jobs/index.html", data_to_front)
 
 
@@ -93,6 +95,19 @@ def addtask(request):
 		lock.release()
 	return HttpResponse('success')
 
+def deltask(request):
+	if not request.session['is_login']:
+		return HttpResponse("failed, not login")
+	group = request.session['cur_group']
+	username = request.session['username']
+	taskId = request.POST.get("name")
+	taskId = "{},{}".format(taskId, group)
+	lock.acquire()
+	cursor.execute("delete from tasks where taskId = '{}'".format(taskId))
+	conn.commit()
+	lock.release()
+	return HttpResponse("delete success")
+
 def movetask(request):
 	if not request.session['is_login']:
 		return HttpResponse("failed, not login")
@@ -101,22 +116,18 @@ def movetask(request):
 	n_todo = request.POST.get("todo")
 	n_doing = request.POST.get("doing")
 	n_done = request.POST.get("done")
-	if (n_todo):
-		lock.acquire()
+	print("todo", n_todo, "doing", n_doing, "done", n_done)
+	lock.acquire()
+	if (n_todo or n_todo == ""):
 		cursor.execute("update groupInfo, user_group set groupInfo.todo='{}' where user_group.groupname = groupInfo.groupname and username = '{}' and groupInfo.groupname like '{},%'".format(n_todo, username, group))
 		conn.commit()
-		lock.release()
-	if (n_doing):
-		lock.acquire()
+	if (n_doing or n_doing == ""):
 		cursor.execute("update groupInfo, user_group set groupInfo.doing='{}' where user_group.groupname = groupInfo.groupname and username = '{}' and groupInfo.groupname like '{},%'".format(n_doing, username, group))
 		conn.commit()
-		lock.release()
-	if (n_done):
-		lock.acquire()
+	if (n_done or n_done == ""):
 		cursor.execute("update groupInfo, user_group set groupInfo.done='{}' where user_group.groupname = groupInfo.groupname and username = '{}' and groupInfo.groupname like '{},%'".format(n_done, username, group))
 		conn.commit()
-		lock.release()
-	print("move",n_todo, n_doing, n_done)
+	lock.release()
 	return HttpResponse('success')
 
 @csrf_exempt
@@ -177,34 +188,142 @@ def group(request):
 	if not request.session['is_login']:
 		return redirect("./login")
 	else:
-		groupli = {"grouplist":[]}
+		groupli = {}
 		username = request.session['username']
 		lock.acquire()
-		cursor.execute("select * from user_group where username = '{}'".format(username))
-		lock.release()
+		cursor.execute("select groupname from user_group where username = '{}'".format(username))
 		grouplist = cursor.fetchall()
 		for index, values in enumerate(grouplist):
-			groupli["grouplist"].append(values[1].split(",")[0])
-		return render(request, "Jobs/group.html", groupli)
+			cursor.execute("select username from user_group where groupname = '{}'".format(values[0]))
+			userli = cursor.fetchall()
+			for i in userli:
+				if values[0].split(",")[0] not in groupli:
+					groupli[values[0].split(",")[0]] = i[0]
+				else:
+					groupli[values[0].split(",")[0]] = "{}, {}".format(groupli[values[0].split(",")[0]], i[0])
+		data_to_front = {"groupli": groupli}
+		lock.release()
+		return render(request, "Jobs/group.html", data_to_front)
 
 def addGroup(request):
 	if not request.session['is_login']:
-		return redirect("./login")
+		return HttpResponse("not login.")
 	username = request.session['username']
-	groupName = request.POST.get('groupName')
-	groupName = "{},{}".format(groupName, datetime.datetime.now())
+	groupname = request.POST.get('groupName')
+	groupName = "{},{}".format(groupname, datetime.datetime.now())
 	lock.acquire()
 	cursor.execute("select groupName from user_group where username = '{}'".format(username))
 	check_group = cursor.fetchall()
 	lock.release()
 	for i in check_group:
-		if (groupName == i[0]):
+		if (groupname == i[0].split(",")[0]):
 			return HttpResponse("group existed.")
 	lock.acquire()
 	cursor.execute("INSERT INTO groupInfo (groupName, todo, doing, done) values ('{}', '{}', '{}', '{}')".format(groupName, "", "", ""))
 	cursor.execute("INSERT INTO user_group (username, groupName) values ('{}', '{}')".format(username, groupName))
-	lock.release()
 	conn.commit()
+	lock.release()
 	return HttpResponse("success")
+
+def invite(request):
+	if not request.session['is_login']:
+		return HttpResponse("not login.")
+	username = request.session['username']
+	groupname = request.POST.get('groupname')
+	f_username = request.POST.get("f_username")
+	lock.acquire()
+	cursor.execute("select username from user where username = '{}'".format(f_username))
+	check_user = cursor.fetchall()
+	if (not check_user):
+		return HttpResponse("not this user")
+	else:
+		cursor.execute("select groupname from user_group where username = '{}' and groupname like '{},%'".format(username, groupname))
+		full_groupname = cursor.fetchall()[0][0]
+		try:
+			cursor.execute("INSERT INTO user_group (username, groupname) values ('{}', '{}')".format(f_username, full_groupname))
+			conn.commit()
+			return HttpResponse("success")
+		except:
+			return HttpResponse("User is alreay in this group")
+
+def leave(request):
+	if not request.session['is_login']:
+		return HttpResponse("not login.")
+	username = request.session['username']
+	groupname = request.POST.get('groupname')
+	lock.acquire()
+	cursor.execute("select groupname from user_group where username = '{}' and groupname like '{},%'".format(username, groupname))
+	full_groupname = cursor.fetchall()[0][0]
+	print(full_groupname)
+	try:
+		cursor.execute("delete from user_group where groupname ='{}' and username='{}'".format(full_groupname, username))
+		conn.commit()
+		cursor.execute("select count(username) from user_group where groupname ='{}'".format(full_groupname))
+		re_user = cursor.fetchone()[0]
+		if re_user == 0:
+			cursor.execute("select todo, doing, done from groupInfo where groupname ='{}'".format(full_groupname))
+			data = cursor.fetchall()
+			cursor.execute("delete from groupInfo where groupname ='{}'".format(full_groupname))
+			conn.commit()
+			if (data):
+				todo = data[0][0].split(",")
+				if (todo):
+					for i in todo:
+						if((not i) or (i == "undefined") or (i == "") or (i == "None")):
+							continue
+						taskId = "{},{}".format(i, groupname)
+						try:
+							cursor.execute("delete from tasks where taskId = '{}'".format(taskId))
+							conn.commit()
+						except:
+							pass
+		
+				doing = data[0][1].split(",")
+				if (doing):
+					for i in doing:
+						if((not i) or (i == "undefined") or (i == "") or (i == "None")):
+							continue
+						taskId = "{},{}".format(i, groupname)
+						try:
+							cursor.execute("delete from tasks where taskId = '{}'".format(taskId))
+							conn.commit()
+						except:
+							pass
+				done = data[0][2].split(",")
+				if (done):
+					print(done)
+					for i in done:
+						if((not i) or (i == "undefined") or (i == "") or (i == "None")):
+							continue
+						taskId = "{},{}".format(i, groupname)
+						try:
+							cursor.execute("delete from tasks where taskId = '{}'".format(taskId))
+							conn.commit()
+						except:
+							pass
+
+	except Exception as e:
+		print(e)
+		pass
+	lock.release()
+	# 删除掉，如果删除后，user group没有数据流，就去 groupinfo 删掉task， 删掉 groupfino
+	return HttpResponse("success")
+
+def logout(request):
+	if not request.session['is_login']:
+		return redirect("./login")
+	try:
+		del request.session['is_login']
+	except:
+		pass
+	try:
+		del request.session['username'] 
+	except:
+		pass
+	try:
+		del request.session['cur_group']
+	except:
+		pass
+	return redirect("./login")
 
 

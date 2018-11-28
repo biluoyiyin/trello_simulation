@@ -12,6 +12,13 @@
     cursor: pointer;
 }
 
+.user{
+    display: inline-block;
+    vertical-align: top;
+    margin: 20px 40px 20px 0;
+    padding: 7px 10px 10px 10px;
+}
+
 .Toplist{
     text-align: center;
 }
