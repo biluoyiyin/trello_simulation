@@ -5,10 +5,12 @@ import pymysql
 from . import info
 from django.contrib.auth.hashers import make_password, check_password
 import json
+import threading
 from threading import Lock
 import datetime
 
 lock = Lock()
+threading.TIMEOUT_MAX = 3
 conn = pymysql.connect(user='root', password='QWER123456', database='Jobs')
 cursor = conn.cursor()
 
@@ -78,12 +80,12 @@ def addtask(request):
 		contents = request.POST.get("contents")
 		isNew = request.POST.get("isNew")
 		if (isNew == "yes"):
-			lock.acquire()
+			lock.acquire(timeout=1)
 			cursor.execute("INSERT INTO tasks (taskId, tag, title, duetime, describes, contents) values (%s, %s, %s, %s, %s, %s)", [taskId, tag, title, duetime, describes, contents])
 			conn.commit()
 			lock.release()
 		else:
-			lock.acquire()
+			lock.acquire(timeout=2)
 			if (tag):
 				cursor.execute("update tasks set tag ='{}' where taskId = '{}'".format(tag, taskId))
 			if (title):
@@ -97,7 +99,7 @@ def addtask(request):
 			conn.commit()
 			lock.release()
 		return HttpResponse('success')
-	except Exception as e:
+	except error as e:
 		return HttpResponse("failed, {}".format(e))
 
 def deltask(request):
@@ -108,12 +110,12 @@ def deltask(request):
 		username = request.session['username']
 		taskId = request.POST.get("name")
 		taskId = "{},{}".format(taskId, group)
-		lock.acquire()
+		lock.acquire(timeout=1)
 		cursor.execute("delete from tasks where taskId = '{}'".format(taskId))
 		conn.commit()
 		lock.release()
 		return HttpResponse("delete success")
-	except Exception as e:
+	except error as e:
 		return HttpResponse("failed, {}".format(e))
 
 def movetask(request):
@@ -126,7 +128,7 @@ def movetask(request):
 		n_doing = request.POST.get("doing")
 		n_done = request.POST.get("done")
 		print("todo", n_todo, "doing", n_doing, "done", n_done)
-		lock.acquire()
+		lock.acquire(timeout=1)
 		if (n_todo or n_todo == ""):
 			cursor.execute("update groupInfo, user_group set groupInfo.todo='{}' where user_group.groupname = groupInfo.groupname and username = '{}' and groupInfo.groupname like '{},%'".format(n_todo, username, group))
 			conn.commit()
@@ -138,7 +140,7 @@ def movetask(request):
 			conn.commit()
 		lock.release()
 		return HttpResponse('success')
-	except Exception as e:
+	except error as e:
 		return HttpResponse("failed, {}".format(e))
 
 @csrf_exempt
@@ -163,14 +165,14 @@ def create_account(request):
 			return redirect("./register?error='passwords not matched.")
 		else:
 			password = make_password(password)
-			lock.acquire()
+			lock.acquire(timeout=1)
 			cursor.execute("INSERT INTO user (username, password ) values ('{}', '{}')".format(username, password))
 			conn.commit()
 			lock.release()
 			request.session['is_login'] = True
 			request.session['username'] = username
 			return redirect("./group")
-	except Exception as e:
+	except error as e:
 		return HttpResponse("failed, {}".format(e))
 
 
@@ -184,7 +186,7 @@ def login(request):
 def check_login(request):
 	username = request.POST.get("username")
 	password = request.POST.get("password")
-	lock.acquire()
+	lock.acquire(timeout=1)
 	cursor.execute("select * from user where username = '{}'".format(username))
 	lock.release()
 	check_user = cursor.fetchall()
@@ -199,12 +201,14 @@ def check_login(request):
 		return redirect("./login?error=not this user.")
 
 def group(request):
+	if "is_login" not in request.session:
+		return redirect("./login")
 	if not request.session['is_login']:
 		return redirect("./login")
 	else:
 		groupli = {}
 		username = request.session['username']
-		lock.acquire()
+		lock.acquire(timeout=2)
 		cursor.execute("select groupname from user_group where username = '{}'".format(username))
 		grouplist = cursor.fetchall()
 		for index, values in enumerate(grouplist):
@@ -226,20 +230,20 @@ def addGroup(request):
 		username = request.session['username']
 		groupname = request.POST.get('groupName')
 		groupName = "{},{}".format(groupname, datetime.datetime.now())
-		lock.acquire()
+		lock.acquire(timeout=1)
 		cursor.execute("select groupName from user_group where username = '{}'".format(username))
 		check_group = cursor.fetchall()
 		lock.release()
 		for i in check_group:
 			if (groupname == i[0].split(",")[0]):
 				return HttpResponse("group existed.")
-		lock.acquire()
+		lock.acquire(timeout=1)
 		cursor.execute("INSERT INTO groupInfo (groupName, todo, doing, done) values ('{}', '{}', '{}', '{}')".format(groupName, "", "", ""))
 		cursor.execute("INSERT INTO user_group (username, groupName) values ('{}', '{}')".format(username, groupName))
 		conn.commit()
 		lock.release()
 		return HttpResponse("success")
-	except Exception as e:
+	except error as e:
 		return HttpResponse("failed, {}".format(e))
 
 def invite(request):
@@ -249,7 +253,7 @@ def invite(request):
 		username = request.session['username']
 		groupname = request.POST.get('groupname')
 		f_username = request.POST.get("f_username")
-		lock.acquire()
+		lock.acquire(timeout=2)
 		cursor.execute("select username from user where username = '{}'".format(f_username))
 		check_user = cursor.fetchall()
 		if (not check_user):
@@ -263,7 +267,7 @@ def invite(request):
 				return HttpResponse("success")
 			except:
 				return HttpResponse("User is alreay in this group")
-	except Exception as e:
+	except error as e:
 		return HttpResponse("failed, {}".format(e))
 
 def leave(request):
@@ -272,7 +276,7 @@ def leave(request):
 			return HttpResponse("not login.")
 		username = request.session['username']
 		groupname = request.POST.get('groupname')
-		lock.acquire()
+		lock.acquire(timeout=3)
 		cursor.execute("select groupname from user_group where username = '{}' and groupname like '{},%'".format(username, groupname))
 		full_groupname = cursor.fetchall()[0][0]
 		print(full_groupname)
@@ -329,7 +333,7 @@ def leave(request):
 		lock.release()
 		# 删除掉，如果删除后，user group没有数据流，就去 groupinfo 删掉task， 删掉 groupfino
 		return HttpResponse("success")
-	except Exception as e:
+	except error as e:
 		return HttpResponse("failed, {}".format(e))
 
 def logout(request):
